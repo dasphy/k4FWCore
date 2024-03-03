@@ -24,7 +24,6 @@
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
-#include "edm4hep/TrackerHitCollection.h"
 #if __has_include("edm4hep/EDM4hepVersion.h")
 #include "edm4hep/EDM4hepVersion.h"
 #else
@@ -64,7 +63,7 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
 
   auto particle = particles->create();
 
-  auto& p4 = particle.momentum();
+  auto& p4 = particle.getMomentum();
   p4.x     = m_magicNumberOffset + m_event + 5;
   p4.y     = m_magicNumberOffset + 6;
   p4.z     = m_magicNumberOffset + 7;
@@ -74,8 +73,8 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
   auto                              hit            = simTrackerHits->create();
   hit.setPosition({3, 4, 5});
 
-  edm4hep::TrackerHitCollection* trackerHits = m_TrackerHitHandle.createAndPut();
-  auto                           trackerHit  = trackerHits->create();
+  edm4hep::TrackerHit3DCollection* trackerHits = m_TrackerHitHandle.createAndPut();
+  auto                             trackerHit  = trackerHits->create();
   trackerHit.setPosition({3, 4, 5});
 
   edm4hep::TrackCollection* tracks = m_trackHandle.createAndPut();
