@@ -36,24 +36,26 @@
 DECLARE_COMPONENT(k4FWCoreTest_CreateExampleEventData)
 
 k4FWCoreTest_CreateExampleEventData::k4FWCoreTest_CreateExampleEventData(const std::string& aName, ISvcLocator* aSvcLoc)
-    : GaudiAlgorithm(aName, aSvcLoc) {
+    : Gaudi::Algorithm(aName, aSvcLoc) {
   declareProperty("mcparticles", m_mcParticleHandle, "Dummy Particle collection (output)");
   declareProperty("simtrackhits", m_simTrackerHitHandle, "Dummy Hit collection (output)");
   declareProperty("trackhits", m_TrackerHitHandle, "Dummy Hit collection (output)");
   declareProperty("tracks", m_trackHandle, "Dummy track collection (output)");
   declareProperty("vectorfloat", m_vectorFloatHandle, "Dummy collection (output)");
+  // Set Cardinality to 1 because this algorithm is not prepared to run in parallel
+  setProperty("Cardinality", 1).ignore();
 }
 
 k4FWCoreTest_CreateExampleEventData::~k4FWCoreTest_CreateExampleEventData() {}
 
 StatusCode k4FWCoreTest_CreateExampleEventData::initialize() {
-  if (GaudiAlgorithm::initialize().isFailure()) {
+  if (Gaudi::Algorithm::initialize().isFailure()) {
     return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
 }
 
-StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
+StatusCode k4FWCoreTest_CreateExampleEventData::execute(const EventContext&) const {
   auto* floatVector = m_vectorFloatHandle.createAndPut();
   floatVector->push_back(125.);
   floatVector->push_back(25.);
@@ -62,11 +64,7 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
   edm4hep::MCParticleCollection* particles = m_mcParticleHandle.createAndPut();
 
   auto particle = particles->create();
-
-  auto& p4 = particle.getMomentum();
-  p4.x     = m_magicNumberOffset + m_event + 5;
-  p4.y     = m_magicNumberOffset + 6;
-  p4.z     = m_magicNumberOffset + 7;
+  particle.setMomentum({m_magicNumberOffset + m_event + 5.0, m_magicNumberOffset + 6.0, m_magicNumberOffset + 7.0});
   particle.setMass(m_magicNumberOffset + m_event + 8);
 
   edm4hep::SimTrackerHitCollection* simTrackerHits = m_simTrackerHitHandle.createAndPut();
@@ -105,4 +103,4 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode k4FWCoreTest_CreateExampleEventData::finalize() { return GaudiAlgorithm::finalize(); }
+StatusCode k4FWCoreTest_CreateExampleEventData::finalize() { return Gaudi::Algorithm::finalize(); }
